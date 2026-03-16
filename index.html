@@ -3,84 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Entraînement Tapis</title>
+    <title>Mon Coach Cardio</title>
     <style>
         :root {
             --primary: #2563eb;
             --secondary: #3b82f6;
             --success: #10b981;
-            --dark: #1e293b;
+            --dark: #0f172a;
+            --card: #1e293b;
             --light: #f8fafc;
         }
-        body { font-family: 'Inter', system-ui, sans-serif; background: #0f172a; color: white; margin: 0; padding: 20px; }
-        .app-container { max-width: 500px; margin: auto; background: var(--dark); padding: 20px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; }
+        .app-container { max-width: 500px; margin: auto; background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         
-        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 25px; color: var(--success); }
+        h1 { text-align: center; font-size: 1.4rem; margin-bottom: 20px; color: var(--success); letter-spacing: 1px; }
 
-        /* Sélecteur de jours */
+        .weight-input { text-align: center; margin-bottom: 25px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; }
+        .weight-input input { background: transparent; border: 1px solid #475569; color: var(--success); padding: 5px; border-radius: 8px; width: 70px; text-align: center; font-size: 1.1rem; font-weight: bold; }
+
         .days-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 20px; scrollbar-width: none; }
-        .day-btn { background: #334155; border: none; color: white; padding: 10px 15px; border-radius: 12px; cursor: pointer; min-width: 60px; transition: 0.3s; }
-        .day-btn.active { background: var(--primary); font-weight: bold; transform: scale(1.1); }
+        .day-btn { background: #334155; border: none; color: white; padding: 12px 18px; border-radius: 14px; cursor: pointer; min-width: 70px; transition: 0.3s; font-weight: 500; }
+        .day-btn.active { background: var(--primary); transform: scale(1.05); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
 
-        /* Panneau de réglages */
-        .control-group { background: #334155; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
-        .label-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 500; }
-        .val-display { color: var(--success); font-weight: bold; font-size: 1.2rem; }
+        .control-group { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .label-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: #94a3b8; }
+        .val-display { color: white; font-weight: bold; font-size: 1.2rem; }
         
-        input[type=range] { width: 100%; height: 8px; border-radius: 5px; background: #475569; appearance: none; cursor: pointer; }
-        input[type=range]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: var(--success); border-radius: 50%; }
+        input[type=range] { width: 100%; height: 6px; border-radius: 5px; background: #475569; appearance: none; cursor: pointer; margin-bottom: 20px; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; background: var(--success); border-radius: 50%; border: 3px solid #1e293b; }
 
-        /* Résultat */
-        .result-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 25px; border-radius: 20px; text-align: center; }
-        .kcal-title { font-size: 0.9rem; text-transform: uppercase; opacity: 0.9; letter-spacing: 1px; }
-        .kcal-value { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
+        .result-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 25px; border-radius: 22px; text-align: center; position: relative; overflow: hidden; }
+        .kcal-title { font-size: 0.8rem; text-transform: uppercase; opacity: 0.8; letter-spacing: 2px; }
+        .kcal-value { font-size: 3.8rem; font-weight: 800; margin: 5px 0; line-height: 1; }
         
-        .info-box { font-size: 0.85rem; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; margin-top: 15px; border-left: 4px solid white; }
-
-        input[type=number] { background: transparent; border: 1px solid #475569; color: white; padding: 5px; border-radius: 5px; width: 60px; text-align: center; }
+        #effortType { display: inline-block; padding: 4px 12px; background: rgba(0,0,0,0.2); border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; }
+        .info-box { font-size: 0.9rem; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 14px; margin-top: 5px; border-left: 4px solid var(--success); line-height: 1.4; text-align: left; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <h1>PROGRAMME TAPIS</h1>
+    <h1>MON COACH TAPIS</h1>
 
-    <div style="text-align: center; margin-bottom: 20px;">
+    <div class="weight-input">
         <label>Mon Poids : </label>
-        <input type="number" id="weight" value="80" oninput="calculate()"> kg
+        <input type="number" id="weight" value="80" oninput="calculate()"> <span style="color:#94a3b8">kg</span>
     </div>
 
-    <div class="days-nav" id="daysNav">
-        </div>
+    <div class="days-nav" id="daysNav"></div>
 
     <div class="control-group">
-        <div class="label-row">
-            <span>Durée</span>
-            <span class="val-display"><span id="timeVal">30</span> min</span>
-        </div>
-        <input type="range" id="time" min="5" max="90" step="5" value="30" oninput="calculate()">
+        <div class="label-row"><span>Durée</span><span class="val-display"><span id="timeVal">30</span> min</span></div>
+        <input type="range" id="time" min="5" max="120" step="5" value="30" oninput="calculate()">
 
-        <div class="label-row" style="margin-top:20px;">
-            <span>Vitesse</span>
-            <span class="val-display"><span id="speedVal">5.0</span> km/h</span>
-        </div>
-        <input type="range" id="speed" min="1" max="12" step="0.1" value="5" oninput="calculate()">
+        <div class="label-row"><span>Vitesse</span><span class="val-display"><span id="speedVal">5.0</span> km/h</span></div>
+        <input type="range" id="speed" min="1" max="15" step="0.1" value="5" oninput="calculate()">
 
-        <div class="label-row" style="margin-top:20px;">
-            <span>Inclinaison</span>
-            <span class="val-display"><span id="inclVal">0</span> %</span>
-        </div>
+        <div class="label-row"><span>Inclinaison</span><span class="val-display"><span id="inclVal">0</span> %</span></div>
         <input type="range" id="incl" min="0" max="15" step="1" value="0" oninput="calculate()">
     </div>
 
     <div class="result-card">
-        <div class="kcal-title">Calories Estimées</div>
+        <div class="kcal-title">Brûlage estimé</div>
         <div class="kcal-value" id="kcalResult">0</div>
-        <div id="effortType" style="font-weight: 600;">MARCHE ACTIVE</div>
-        
-        <div class="info-box" id="advice">
-            Sélectionnez un jour pour commencer.
-        </div>
+        <div id="effortType">ANALYSE EN COURS...</div>
+        <div class="info-box" id="advice"></div>
     </div>
 </div>
 
@@ -91,14 +78,16 @@
     const inclInput = document.getElementById('incl');
     
     const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+    
+    // MISE À JOUR DU PROGRAMME OBJECTIF
     const dayData = {
-        "Lun": { t: 45, s: 6.0, i: 0, desc: "Objectif : Endurance fondamentale. Respiration calme." },
-        "Mar": { t: 40, s: 7.2, i: 1, desc: "Objectif : Fractionné. Alternez 1min rapide / 1min lent." },
-        "Mer": { t: 40, s: 4.8, i: 9, desc: "Objectif : Brûlage de graisses (Lypolyse). Ne tenez pas les barres !" },
-        "Jeu": { t: 30, s: 5.0, i: 0, desc: "Récupération active. Très faible intensité." },
-        "Ven": { t: 50, s: 6.0, i: 1, desc: "Séance longue. Travail cardio régulier." },
-        "Sam": { t: 0, s: 0, i: 0, desc: "REPOS COMPLET. Laissez le cortisol descendre." },
-        "Dim": { t: 60, s: 5.2, i: 6, desc: "Sortie longue inclinée. Idéal contre la graisse abdominale." }
+        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente ou marche très rapide à plat. Idéal pour muscler le cœur sans stress." },
+        "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné Doux :</b> Alternez 1 min à 7.5 km/h et 1 min à 5.5 km/h. Boost le métabolisme." },
+        "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Objectif Ventre Plat :</b> Marche inclinée forte. Brûle un maximum de graisses viscérales sans courir." },
+        "Jeu": { t: 30, s: 5.0, i: 0, desc: "🎯 <b>Récupération :</b> Marche tranquille pour éliminer les toxines et reposer les articulations." },
+        "Ven": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Travail de fond. Maintien de l'effort sur la durée pour l'endurance aérobie." },
+        "Sam": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos Total :</b> Indispensable pour laisser le corps se reconstruire et faire baisser le cortisol." },
+        "Dim": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Sortie longue avec pente modérée. Combine endurance et renforcement fessiers." }
     };
 
     function initDays() {
@@ -115,12 +104,11 @@
     function selectDay(day, btn) {
         document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
         const data = dayData[day];
         timeInput.value = data.t;
         speedInput.value = data.s;
         inclInput.value = data.i;
-        document.getElementById('advice').innerText = data.desc;
+        document.getElementById('advice').innerHTML = data.desc;
         calculate();
     }
 
@@ -134,25 +122,35 @@
         document.getElementById('speedVal').innerText = s.toFixed(1);
         document.getElementById('inclVal').innerText = i;
 
-        if (s === 0) {
+        if (s === 0 || t === 0) {
             document.getElementById('kcalResult').innerText = "0";
+            document.getElementById('effortType').innerText = "REPOS";
             return;
         }
 
-        // Formule du MET simplifiée avec facteur d'inclinaison
-        // Marche plate (MET ~3.5) / Course (MET ~8+) / Inclinaison ajoute environ 0.5 MET par %
-        let baseMet = s < 6 ? 3.5 : (s * 1.2); 
-        let inclFactor = (i * 0.5); 
-        let totalMet = baseMet + inclFactor;
+        // Formule de calcul : MET (Équivalent métabolique)
+        // Marche : 3.5 + 0.1*v + 1.8*v*incl
+        // Course (>8km/h) : 3.5 + 0.2*v + 0.9*v*incl
+        let met = 0;
+        let v_ms = s / 3.6; // conversion km/h en m/s
+        if (s <= 8) {
+            met = (3.5 + (0.1 * s * 16.6) + (1.8 * s * 16.6 * i/100)) / 3.5;
+        } else {
+            met = (3.5 + (0.2 * s * 16.6) + (0.9 * s * 16.6 * i/100)) / 3.5;
+        }
         
-        let kcal = Math.round((totalMet * 3.5 * w / 200) * t);
+        let kcal = Math.round(met * 3.5 * w / 200 * t);
 
         document.getElementById('kcalResult').innerText = kcal;
-        document.getElementById('effortType').innerText = s > 7.5 ? "COURSE" : (i > 5 ? "MARCHE INCLINÉE" : "MARCHE ACTIVE");
+        
+        // Label d'effort
+        let label = "MARCHE ACTIVE";
+        if (s > 8) label = "COURSE";
+        if (i > 6 && s <= 6.5) label = "LIPOLYSE (PENTE)";
+        document.getElementById('effortType').innerText = label;
     }
 
     initDays();
-    // Sélectionner Lundi par défaut au chargement
     setTimeout(() => document.querySelector('.day-btn').click(), 100);
 </script>
 
