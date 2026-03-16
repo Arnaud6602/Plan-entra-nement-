@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Entraînement Tapis</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #3b82f6;
+            --success: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #0f172a; color: white; margin: 0; padding: 20px; }
+        .app-container { max-width: 500px; margin: auto; background: var(--dark); padding: 20px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 25px; color: var(--success); }
+
+        /* Sélecteur de jours */
+        .days-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 20px; scrollbar-width: none; }
+        .day-btn { background: #334155; border: none; color: white; padding: 10px 15px; border-radius: 12px; cursor: pointer; min-width: 60px; transition: 0.3s; }
+        .day-btn.active { background: var(--primary); font-weight: bold; transform: scale(1.1); }
+
+        /* Panneau de réglages */
+        .control-group { background: #334155; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+        .label-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 500; }
+        .val-display { color: var(--success); font-weight: bold; font-size: 1.2rem; }
+        
+        input[type=range] { width: 100%; height: 8px; border-radius: 5px; background: #475569; appearance: none; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: var(--success); border-radius: 50%; }
+
+        /* Résultat */
+        .result-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 25px; border-radius: 20px; text-align: center; }
+        .kcal-title { font-size: 0.9rem; text-transform: uppercase; opacity: 0.9; letter-spacing: 1px; }
+        .kcal-value { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
+        
+        .info-box { font-size: 0.85rem; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; margin-top: 15px; border-left: 4px solid white; }
+
+        input[type=number] { background: transparent; border: 1px solid #475569; color: white; padding: 5px; border-radius: 5px; width: 60px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>PROGRAMME TAPIS</h1>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <label>Mon Poids : </label>
+        <input type="number" id="weight" value="80" oninput="calculate()"> kg
+    </div>
+
+    <div class="days-nav" id="daysNav">
+        </div>
+
+    <div class="control-group">
+        <div class="label-row">
+            <span>Durée</span>
+            <span class="val-display"><span id="timeVal">30</span> min</span>
+        </div>
+        <input type="range" id="time" min="5" max="90" step="5" value="30" oninput="calculate()">
+
+        <div class="label-row" style="margin-top:20px;">
+            <span>Vitesse</span>
+            <span class="val-display"><span id="speedVal">5.0</span> km/h</span>
+        </div>
+        <input type="range" id="speed" min="1" max="12" step="0.1" value="5" oninput="calculate()">
+
+        <div class="label-row" style="margin-top:20px;">
+            <span>Inclinaison</span>
+            <span class="val-display"><span id="inclVal">0</span> %</span>
+        </div>
+        <input type="range" id="incl" min="0" max="15" step="1" value="0" oninput="calculate()">
+    </div>
+
+    <div class="result-card">
+        <div class="kcal-title">Calories Estimées</div>
+        <div class="kcal-value" id="kcalResult">0</div>
+        <div id="effortType" style="font-weight: 600;">MARCHE ACTIVE</div>
+        
+        <div class="info-box" id="advice">
+            Sélectionnez un jour pour commencer.
+        </div>
+    </div>
+</div>
+
+<script>
+    const weightInput = document.getElementById('weight');
+    const timeInput = document.getElementById('time');
+    const speedInput = document.getElementById('speed');
+    const inclInput = document.getElementById('incl');
+    
+    const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+    const dayData = {
+        "Lun": { t: 45, s: 6.0, i: 0, desc: "Objectif : Endurance fondamentale. Respiration calme." },
+        "Mar": { t: 40, s: 7.2, i: 1, desc: "Objectif : Fractionné. Alternez 1min rapide / 1min lent." },
+        "Mer": { t: 40, s: 4.8, i: 9, desc: "Objectif : Brûlage de graisses (Lypolyse). Ne tenez pas les barres !" },
+        "Jeu": { t: 30, s: 5.0, i: 0, desc: "Récupération active. Très faible intensité." },
+        "Ven": { t: 50, s: 6.0, i: 1, desc: "Séance longue. Travail cardio régulier." },
+        "Sam": { t: 0, s: 0, i: 0, desc: "REPOS COMPLET. Laissez le cortisol descendre." },
+        "Dim": { t: 60, s: 5.2, i: 6, desc: "Sortie longue inclinée. Idéal contre la graisse abdominale." }
+    };
+
+    function initDays() {
+        const nav = document.getElementById('daysNav');
+        days.forEach(d => {
+            const btn = document.createElement('button');
+            btn.className = 'day-btn';
+            btn.innerText = d;
+            btn.onclick = () => selectDay(d, btn);
+            nav.appendChild(btn);
+        });
+    }
+
+    function selectDay(day, btn) {
+        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        const data = dayData[day];
+        timeInput.value = data.t;
+        speedInput.value = data.s;
+        inclInput.value = data.i;
+        document.getElementById('advice').innerText = data.desc;
+        calculate();
+    }
+
+    function calculate() {
+        const w = parseFloat(weightInput.value);
+        const t = parseFloat(timeInput.value);
+        const s = parseFloat(speedInput.value);
+        const i = parseFloat(inclInput.value);
+
+        document.getElementById('timeVal').innerText = t;
+        document.getElementById('speedVal').innerText = s.toFixed(1);
+        document.getElementById('inclVal').innerText = i;
+
+        if (s === 0) {
+            document.getElementById('kcalResult').innerText = "0";
+            return;
+        }
+
+        // Formule du MET simplifiée avec facteur d'inclinaison
+        // Marche plate (MET ~3.5) / Course (MET ~8+) / Inclinaison ajoute environ 0.5 MET par %
+        let baseMet = s < 6 ? 3.5 : (s * 1.2); 
+        let inclFactor = (i * 0.5); 
+        let totalMet = baseMet + inclFactor;
+        
+        let kcal = Math.round((totalMet * 3.5 * w / 200) * t);
+
+        document.getElementById('kcalResult').innerText = kcal;
+        document.getElementById('effortType').innerText = s > 7.5 ? "COURSE" : (i > 5 ? "MARCHE INCLINÉE" : "MARCHE ACTIVE");
+    }
+
+    initDays();
+    // Sélectionner Lundi par défaut au chargement
+    setTimeout(() => document.querySelector('.day-btn').click(), 100);
+</script>
+
+</body>
+</html>
