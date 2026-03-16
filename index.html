@@ -38,7 +38,6 @@
         .btn-validate { width: 100%; background: var(--success); border: none; color: white; padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 12px; transition: 0.2s; }
         .btn-validate:active { transform: scale(0.96); opacity: 0.8; }
 
-        /* Stats & Calendrier Mensuel */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; text-align: center; }
         .stat-card { background: #334155; padding: 12px; border-radius: 15px; }
         .stat-card span { display: block; font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; }
@@ -83,7 +82,7 @@
 
         <div class="result-box">
             <span style="font-size: 0.8rem; text-transform: uppercase;">Séance actuelle</span>
-            <span class="kcal-val" id="kcalResult">0 <small style="font-size: 1.2rem;">kcal</small></span>
+            <span class="kcal-val" id="kcalResult">0</span>
         </div>
         <button class="btn-validate" onclick="saveSession()">VALIDER & ENREGISTRER</button>
     </div>
@@ -108,18 +107,14 @@
 <script>
     const daysArr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
     const dayDataDefaults = {
-        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente." },
-        "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné Doux :</b> 1min rapide / 1min lente." },
+        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance :</b> Course lente." },
+        "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné :</b> 1min rapide / 1min lente." },
         "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Ventre Plat :</b> Marche inclinée forte." },
         "Jeu": { t: 30, s: 5.0, i: 0, desc: "🎯 <b>Récupération :</b> Marche tranquille." },
-        "Fri": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Stable." },
-        "Sat": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos.</b>" },
-        "Sun": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Inclinaison longue." }
+        "Ven": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Brûlage stable." },
+        "Sam": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos.</b>" },
+        "Dim": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Sortie longue inclinée." }
     };
-    // Correction des clés pour correspondre aux boutons
-    dayDataDefaults["Ven"] = dayDataDefaults["Fri"]; 
-    dayDataDefaults["Sam"] = dayDataDefaults["Sat"];
-    dayDataDefaults["Dim"] = dayDataDefaults["Sun"];
 
     let history = JSON.parse(localStorage.getItem('tapisHistory')) || {};
     let viewDate = new Date();
@@ -135,6 +130,7 @@
         });
         renderCalendar();
         updateStats(new Date());
+        
         const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
         const todayName = dayNames[new Date().getDay()];
         const targetBtn = Array.from(document.querySelectorAll('.day-btn')).find(b => b.innerText === todayName) || document.querySelectorAll('.day-btn')[0];
@@ -170,9 +166,13 @@
     function saveSession() {
         const kcal = parseInt(document.getElementById('kcalResult').innerText);
         if (kcal <= 0) return;
-        const iso = new Date().toISOString().split('T')[0];
+        
+        // CORRECTION DATE LOCALE
+        const iso = new Date().toLocaleDateString('en-CA'); 
+        
         history[iso] = (history[iso] || 0) + kcal;
         saveAndRefresh(new Date());
+        alert("Séance enregistrée ! 🔥");
     }
 
     function changeMonth(offset) {
@@ -193,7 +193,6 @@
         const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
         document.getElementById('currentMonthYear').innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
-        // Jours de la semaine
         daysArr.forEach(d => grid.innerHTML += `<div class="weekday-label">${d}</div>`);
 
         const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
@@ -204,9 +203,9 @@
 
         for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(viewDate.getFullYear(), viewDate.getMonth(), d);
-            const iso = dateObj.toISOString().split('T')[0];
+            const iso = dateObj.toLocaleDateString('en-CA');
             const hasKcal = history[iso];
-            const isToday = iso === new Date().toISOString().split('T')[0];
+            const isToday = iso === new Date().toLocaleDateString('en-CA');
             
             const dayEl = document.createElement('div');
             dayEl.className = `cal-day ${hasKcal ? 'has-data' : ''} ${isToday ? 'today' : ''}`;
@@ -229,12 +228,13 @@
         const refMonth = refDate.getMonth();
         const refYear = refDate.getFullYear();
         
-        // Calcul du lundi de la semaine de refDate
         const d = new Date(refDate);
         const day = d.getDay();
         const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(d.setDate(diff)).toISOString().split('T')[0];
-        const sunday = new Date(new Date(monday).setDate(new Date(monday).getDate() + 6)).toISOString().split('T')[0];
+        const monday = new Date(d.setDate(diff)).toLocaleDateString('en-CA');
+        const sundayDate = new Date(new Date(monday));
+        sundayDate.setDate(sundayDate.getDate() + 6);
+        const sunday = sundayDate.toLocaleDateString('en-CA');
 
         Object.keys(history).forEach(iso => {
             const val = history[iso];
