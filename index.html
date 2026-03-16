@@ -3,41 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Coach Cardio</title>
+    <title>Tapis Tracker Pro - Coach</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --secondary: #3b82f6;
-            --success: #10b981;
-            --dark: #0f172a;
-            --card: #1e293b;
-            --light: #f8fafc;
+            --primary: #2563eb; --secondary: #3b82f6; --success: #10b981;
+            --dark: #0f172a; --card: #1e293b; --text: #f8fafc;
         }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; }
-        .app-container { max-width: 500px; margin: auto; background: var(--card); padding: 20px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        body { font-family: 'Inter', sans-serif; background: var(--dark); color: var(--text); margin: 0; padding: 15px; }
+        .app-container { max-width: 550px; margin: auto; }
         
-        h1 { text-align: center; font-size: 1.4rem; margin-bottom: 20px; color: var(--success); letter-spacing: 1px; }
+        .section { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        h1 { text-align: center; font-size: 1.4rem; color: var(--success); margin-bottom: 20px; }
+        h2 { font-size: 1.1rem; margin-top: 0; color: var(--success); display: flex; justify-content: space-between; align-items: center; }
 
-        .weight-input { text-align: center; margin-bottom: 25px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px; }
-        .weight-input input { background: transparent; border: 1px solid #475569; color: var(--success); padding: 5px; border-radius: 8px; width: 70px; text-align: center; font-size: 1.1rem; font-weight: bold; }
+        .weight-cfg { text-align: center; margin-bottom: 15px; font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; }
+        input[type=number] { background: #334155; border: 1px solid #475569; color: var(--success); padding: 5px; border-radius: 8px; width: 60px; text-align: center; font-weight: bold; }
 
-        .days-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 20px; scrollbar-width: none; }
-        .day-btn { background: #334155; border: none; color: white; padding: 12px 18px; border-radius: 14px; cursor: pointer; min-width: 70px; transition: 0.3s; font-weight: 500; }
-        .day-btn.active { background: var(--primary); transform: scale(1.05); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
+        .days-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; scrollbar-width: none; }
+        .day-btn { background: #334155; border: none; color: white; padding: 12px 16px; border-radius: 12px; cursor: pointer; min-width: 75px; transition: 0.3s; }
+        .day-btn.active { background: var(--primary); font-weight: bold; transform: scale(1.05); }
 
-        .control-group { background: rgba(0,0,0,0.2); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .label-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: #94a3b8; }
-        .val-display { color: white; font-weight: bold; font-size: 1.2rem; }
+        .info-box { font-size: 0.9rem; background: rgba(37, 99, 235, 0.1); padding: 15px; border-radius: 14px; margin-bottom: 20px; border-left: 4px solid var(--primary); line-height: 1.4; }
+
+        .control { margin-bottom: 15px; }
+        .label-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px; }
+        .val-display { color: white; font-weight: bold; }
         
-        input[type=range] { width: 100%; height: 6px; border-radius: 5px; background: #475569; appearance: none; cursor: pointer; margin-bottom: 20px; }
+        input[type=range] { width: 100%; height: 6px; border-radius: 5px; background: #475569; appearance: none; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; background: var(--success); border-radius: 50%; border: 3px solid #1e293b; }
 
-        .result-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 25px; border-radius: 22px; text-align: center; position: relative; overflow: hidden; }
-        .kcal-title { font-size: 0.8rem; text-transform: uppercase; opacity: 0.8; letter-spacing: 2px; }
-        .kcal-value { font-size: 3.8rem; font-weight: 800; margin: 5px 0; line-height: 1; }
+        .result-box { background: linear-gradient(135deg, var(--primary), var(--secondary)); padding: 20px; border-radius: 18px; text-align: center; margin-top: 10px; }
+        .kcal-val { font-size: 3rem; font-weight: 800; display: block; line-height: 1; }
         
-        #effortType { display: inline-block; padding: 4px 12px; background: rgba(0,0,0,0.2); border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; }
-        .info-box { font-size: 0.9rem; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 14px; margin-top: 5px; border-left: 4px solid var(--success); line-height: 1.4; text-align: left; }
+        .btn-validate { width: 100%; background: var(--success); border: none; color: white; padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 12px; transition: 0.2s; }
+        .btn-validate:active { transform: scale(0.96); opacity: 0.8; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; text-align: center; }
+        .stat-card { background: #334155; padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-card span { display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-card b { font-size: 1rem; color: var(--success); }
+
+        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 20px; }
+        .cal-day { aspect-ratio: 1; background: #334155; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; position: relative; border: 1px solid transparent; }
+        .cal-day.has-data { background: rgba(16, 185, 129, 0.2); border-color: var(--success); color: var(--success); }
+        .cal-day b { font-size: 0.75rem; margin-top: 2px; }
+        .cal-day.today { border-color: var(--primary); box-shadow: 0 0 10px rgba(37, 99, 235, 0.3); }
+
+        .btn-clear { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -45,114 +57,169 @@
 <div class="app-container">
     <h1>MON COACH TAPIS</h1>
 
-    <div class="weight-input">
-        <label>Mon Poids : </label>
-        <input type="number" id="weight" value="80" oninput="calculate()"> <span style="color:#94a3b8">kg</span>
+    <div class="section">
+        <div class="weight-cfg">
+            <label>Mon Poids :</label>
+            <input type="number" id="weight" value="80" oninput="calculate()"> <span style="color:#94a3b8">kg</span>
+        </div>
+
+        <div class="days-nav" id="daysNav"></div>
+
+        <div class="info-box" id="advice">
+            Sélectionnez un jour pour charger votre séance.
+        </div>
+
+        <div class="control">
+            <div class="label-row"><span>Durée</span><span class="val-display" id="tDisplay">30 min</span></div>
+            <input type="range" id="time" min="5" max="120" step="5" value="30" oninput="calculate()">
+        </div>
+        <div class="control">
+            <div class="label-row"><span>Vitesse</span><span class="val-display" id="sDisplay">5.0 km/h</span></div>
+            <input type="range" id="speed" min="1" max="15" step="0.1" value="5" oninput="calculate()">
+        </div>
+        <div class="control">
+            <div class="label-row"><span>Inclinaison</span><span class="val-display" id="iDisplay">0 %</span></div>
+            <input type="range" id="incl" min="0" max="15" step="1" value="0" oninput="calculate()">
+        </div>
+
+        <div class="result-box">
+            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Brûlage Estimé</span>
+            <span class="kcal-val" id="kcalResult">0 <small style="font-size: 1.2rem; font-weight: 400;">kcal</small></span>
+        </div>
+        <button class="btn-validate" onclick="saveSession()">VALIDER & ENREGISTRER</button>
     </div>
 
-    <div class="days-nav" id="daysNav"></div>
-
-    <div class="control-group">
-        <div class="label-row"><span>Durée</span><span class="val-display"><span id="timeVal">30</span> min</span></div>
-        <input type="range" id="time" min="5" max="120" step="5" value="30" oninput="calculate()">
-
-        <div class="label-row"><span>Vitesse</span><span class="val-display"><span id="speedVal">5.0</span> km/h</span></div>
-        <input type="range" id="speed" min="1" max="15" step="0.1" value="5" oninput="calculate()">
-
-        <div class="label-row"><span>Inclinaison</span><span class="val-display"><span id="inclVal">0</span> %</span></div>
-        <input type="range" id="incl" min="0" max="15" step="1" value="0" oninput="calculate()">
-    </div>
-
-    <div class="result-card">
-        <div class="kcal-title">Brûlage estimé</div>
-        <div class="kcal-value" id="kcalResult">0</div>
-        <div id="effortType">ANALYSE EN COURS...</div>
-        <div class="info-box" id="advice"></div>
+    <div class="section">
+        <h2>HISTORIQUE <button class="btn-clear" onclick="clearData()">RAZ</button></h2>
+        <div class="stats-grid">
+            <div class="stat-card"><span>7 Jours</span><b id="weekTotal">0</b></div>
+            <div class="stat-card"><span>Mois</span><b id="monthTotal">0</b></div>
+            <div class="stat-card"><span>Année</span><b id="yearTotal">0</b></div>
+        </div>
+        <div class="calendar" id="calendar"></div>
     </div>
 </div>
 
 <script>
-    const weightInput = document.getElementById('weight');
-    const timeInput = document.getElementById('time');
-    const speedInput = document.getElementById('speed');
-    const inclInput = document.getElementById('incl');
-    
     const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-    
-    // MISE À JOUR DU PROGRAMME OBJECTIF
-    const dayData = {
-        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente ou marche très rapide à plat. Idéal pour muscler le cœur sans stress." },
-        "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné Doux :</b> Alternez 1 min à 7.5 km/h et 1 min à 5.5 km/h. Boost le métabolisme." },
-        "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Objectif Ventre Plat :</b> Marche inclinée forte. Brûle un maximum de graisses viscérales sans courir." },
-        "Jeu": { t: 30, s: 5.0, i: 0, desc: "🎯 <b>Récupération :</b> Marche tranquille pour éliminer les toxines et reposer les articulations." },
-        "Ven": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Travail de fond. Maintien de l'effort sur la durée pour l'endurance aérobie." },
-        "Sam": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos Total :</b> Indispensable pour laisser le corps se reconstruire et faire baisser le cortisol." },
-        "Dim": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Sortie longue avec pente modérée. Combine endurance et renforcement fessiers." }
+    const dayDataDefaults = {
+        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente à plat. Travaille le souffle et la base aérobie." },
+        "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné Doux :</b> Alternez 1min rapide et 1min lente. Boost le métabolisme." },
+        "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Objectif Ventre Plat :</b> Marche inclinée forte. Brûle les graisses sans impact articulaire." },
+        "Jeu": { t: 30, s: 5.0, i: 0, desc: "🎯 <b>Récupération :</b> Marche tranquille pour éliminer les toxines." },
+        "Ven": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Travail de fond régulier pour la perte de poids." },
+        "Sam": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos :</b> Laissez votre corps récupérer pour éviter le surentraînement." },
+        "Dim": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Sortie longue inclinée. Excellent pour sculpter les fessiers." }
     };
 
-    function initDays() {
+    let history = JSON.parse(localStorage.getItem('tapisHistory')) || {};
+
+    function init() {
         const nav = document.getElementById('daysNav');
         days.forEach(d => {
             const btn = document.createElement('button');
             btn.className = 'day-btn';
             btn.innerText = d;
-            btn.onclick = () => selectDay(d, btn);
+            btn.onclick = () => loadDay(d, btn);
             nav.appendChild(btn);
         });
+        renderCalendar();
+        updateStats();
+        // Charger le jour actuel par défaut
+        const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+        const todayName = dayNames[new Date().getDay()];
+        const targetBtn = Array.from(document.querySelectorAll('.day-btn')).find(b => b.innerText === todayName) || document.querySelectorAll('.day-btn')[0];
+        targetBtn.click();
     }
 
-    function selectDay(day, btn) {
+    function loadDay(day, btn) {
         document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const data = dayData[day];
-        timeInput.value = data.t;
-        speedInput.value = data.s;
-        inclInput.value = data.i;
-        document.getElementById('advice').innerHTML = data.desc;
+        const d = dayDataDefaults[day];
+        document.getElementById('time').value = d.t;
+        document.getElementById('speed').value = d.s;
+        document.getElementById('incl').value = d.i;
+        document.getElementById('advice').innerHTML = d.desc;
         calculate();
     }
 
     function calculate() {
-        const w = parseFloat(weightInput.value);
-        const t = parseFloat(timeInput.value);
-        const s = parseFloat(speedInput.value);
-        const i = parseFloat(inclInput.value);
+        const w = parseFloat(document.getElementById('weight').value);
+        const t = parseFloat(document.getElementById('time').value);
+        const s = parseFloat(document.getElementById('speed').value);
+        const i = parseFloat(document.getElementById('incl').value);
 
-        document.getElementById('timeVal').innerText = t;
-        document.getElementById('speedVal').innerText = s.toFixed(1);
-        document.getElementById('inclVal').innerText = i;
+        document.getElementById('tDisplay').innerText = t + " min";
+        document.getElementById('sDisplay').innerText = s.toFixed(1) + " km/h";
+        document.getElementById('iDisplay').innerText = i + " %";
 
-        if (s === 0 || t === 0) {
-            document.getElementById('kcalResult').innerText = "0";
-            document.getElementById('effortType').innerText = "REPOS";
-            return;
-        }
+        if (s === 0) { document.getElementById('kcalResult').innerHTML = "0 <small style='font-size: 1.2rem; font-weight: 400;'>kcal</small>"; return; }
 
-        // Formule de calcul : MET (Équivalent métabolique)
-        // Marche : 3.5 + 0.1*v + 1.8*v*incl
-        // Course (>8km/h) : 3.5 + 0.2*v + 0.9*v*incl
-        let met = 0;
-        let v_ms = s / 3.6; // conversion km/h en m/s
-        if (s <= 8) {
-            met = (3.5 + (0.1 * s * 16.6) + (1.8 * s * 16.6 * i/100)) / 3.5;
-        } else {
-            met = (3.5 + (0.2 * s * 16.6) + (0.9 * s * 16.6 * i/100)) / 3.5;
-        }
-        
+        let met = (s <= 8) ? (3.5 + (0.1 * s * 16.6) + (1.8 * s * 16.6 * i/100)) / 3.5 
+                           : (3.5 + (0.2 * s * 16.6) + (0.9 * s * 16.6 * i/100)) / 3.5;
         let kcal = Math.round(met * 3.5 * w / 200 * t);
-
-        document.getElementById('kcalResult').innerText = kcal;
-        
-        // Label d'effort
-        let label = "MARCHE ACTIVE";
-        if (s > 8) label = "COURSE";
-        if (i > 6 && s <= 6.5) label = "LIPOLYSE (PENTE)";
-        document.getElementById('effortType').innerText = label;
+        document.getElementById('kcalResult').innerHTML = kcal + " <small style='font-size: 1.2rem; font-weight: 400;'>kcal</small>";
     }
 
-    initDays();
-    setTimeout(() => document.querySelector('.day-btn').click(), 100);
-</script>
+    function saveSession() {
+        const kcal = parseInt(document.getElementById('kcalResult').innerText);
+        if (kcal <= 0) return alert("Vitesse trop basse pour valider !");
+        
+        const today = new Date().toISOString().split('T')[0];
+        history[today] = (history[today] || 0) + kcal;
+        localStorage.setItem('tapisHistory', JSON.stringify(history));
+        
+        renderCalendar();
+        updateStats();
+        alert("Bravo ! Séance enregistrée. 🔥");
+    }
 
+    function renderCalendar() {
+        const cal = document.getElementById('calendar');
+        cal.innerHTML = "";
+        const now = new Date();
+        // 28 derniers jours
+        for (let j = 27; j >= 0; j--) {
+            const d = new Date();
+            d.setDate(now.getDate() - j);
+            const iso = d.toISOString().split('T')[0];
+            const hasKcal = history[iso];
+            
+            const dayEl = document.createElement('div');
+            dayEl.className = `cal-day ${hasKcal ? 'has-data' : ''} ${j === 0 ? 'today' : ''}`;
+            dayEl.innerHTML = `<span>${d.getDate()}</span><b>${hasKcal ? hasKcal : ''}</b>`;
+            cal.appendChild(dayEl);
+        }
+    }
+
+    function updateStats() {
+        let wTotal = 0, mTotal = 0, yTotal = 0;
+        const now = new Date();
+        Object.keys(history).forEach(dateStr => {
+            const d = new Date(dateStr);
+            const val = history[dateStr];
+            if (d.getFullYear() === now.getFullYear()) {
+                yTotal += val;
+                if (d.getMonth() === now.getMonth()) mTotal += val;
+                const diff = (now - d) / (1000 * 60 * 60 * 24);
+                if (diff <= 7) wTotal += val;
+            }
+        });
+        document.getElementById('weekTotal').innerText = wTotal;
+        document.getElementById('monthTotal').innerText = mTotal;
+        document.getElementById('yearTotal').innerText = yTotal;
+    }
+
+    function clearData() {
+        if(confirm("Effacer tout l'historique ?")) {
+            localStorage.removeItem('tapisHistory');
+            history = {};
+            renderCalendar();
+            updateStats();
+        }
+    }
+
+    init();
+</script>
 </body>
 </html>
