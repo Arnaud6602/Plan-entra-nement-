@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tapis Tracker Pro - Final</title>
+    <title>Tapis Tracker - Calendrier Mensuel</title>
     <style>
         :root {
             --primary: #2563eb; --secondary: #3b82f6; --success: #10b981;
@@ -38,17 +38,22 @@
         .btn-validate { width: 100%; background: var(--success); border: none; color: white; padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 12px; transition: 0.2s; }
         .btn-validate:active { transform: scale(0.96); opacity: 0.8; }
 
+        /* Stats & Calendrier Mensuel */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; text-align: center; }
-        .stat-card { background: #334155; padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); cursor: help; }
-        .stat-card span { display: block; font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-card { background: #334155; padding: 12px; border-radius: 15px; }
+        .stat-card span { display: block; font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; }
         .stat-card b { font-size: 0.9rem; color: var(--success); }
 
-        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 20px; }
-        .cal-day { aspect-ratio: 1; background: #334155; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; position: relative; border: 1px solid transparent; cursor: pointer; transition: 0.2s; }
-        .cal-day:hover { background: #475569; transform: scale(1.05); }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px; }
+        .cal-nav-btn { background: #334155; border: none; color: white; padding: 5px 15px; border-radius: 8px; cursor: pointer; }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
+        .weekday-label { text-align: center; font-size: 0.7rem; color: #94a3b8; font-weight: bold; padding-bottom: 5px; }
+        .cal-day { aspect-ratio: 1; background: #1e293b; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); }
+        .cal-day.empty { background: transparent; border: none; cursor: default; }
         .cal-day.has-data { background: rgba(16, 185, 129, 0.2); border-color: var(--success); color: var(--success); }
-        .cal-day b { font-size: 0.75rem; margin-top: 2px; }
-        .cal-day.today { border-color: var(--primary); box-shadow: 0 0 10px rgba(37, 99, 235, 0.3); }
+        .cal-day b { font-size: 0.7rem; margin-top: 2px; }
+        .cal-day.today { border: 2px solid var(--primary); }
 
         .btn-clear { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; }
     </style>
@@ -59,11 +64,7 @@
     <h1>MON COACH TAPIS</h1>
 
     <div class="section">
-        <div class="weight-cfg">
-            <label>Poids :</label>
-            <input type="number" id="weight" value="80" oninput="calculate()"> <span style="color:#94a3b8">kg</span>
-        </div>
-
+        <div class="weight-cfg"><label>Poids :</label> <input type="number" id="weight" value="80" oninput="calculate()"> kg</div>
         <div class="days-nav" id="daysNav"></div>
         <div class="info-box" id="advice">Sélectionnez un jour.</div>
 
@@ -76,46 +77,56 @@
             <input type="range" id="speed" min="1" max="15" step="0.1" value="5" oninput="calculate()">
         </div>
         <div class="control">
-            <div class="label-row"><span>Inclinaison</span><span class="val-display" id="iDisplay">0 %</span></div>
+            <div class="label-row"><span>Inclinaison</span><span class="val-display" id="inclVal">0 %</span></div>
             <input type="range" id="incl" min="0" max="15" step="1" value="0" oninput="calculate()">
         </div>
 
         <div class="result-box">
             <span style="font-size: 0.8rem; text-transform: uppercase;">Séance actuelle</span>
-            <span class="kcal-val" id="kcalResult">0 <small style="font-size: 1.2rem; font-weight: 400;">kcal</small></span>
+            <span class="kcal-val" id="kcalResult">0 <small style="font-size: 1.2rem;">kcal</small></span>
         </div>
         <button class="btn-validate" onclick="saveSession()">VALIDER & ENREGISTRER</button>
     </div>
 
     <div class="section">
-        <h2>HISTORIQUE <button class="btn-clear" onclick="clearData()">RAZ</button></h2>
+        <h2>BILAN <button class="btn-clear" onclick="clearData()">RAZ</button></h2>
         <div class="stats-grid">
-            <div class="stat-card" title="Total du Lundi au Dimanche de la date sélectionnée"><span>Semaine</span><b id="weekTotal">0</b></div>
-            <div class="stat-card" title="Total du mois de la date sélectionnée"><span>Mois</span><b id="monthTotal">0</b></div>
-            <div class="stat-card" title="Total de l'année en cours"><span>Année</span><b id="yearTotal">0</b></div>
+            <div class="stat-card"><span>Semaine</span><b id="weekTotal">0</b></div>
+            <div class="stat-card"><span>Mois</span><b id="monthTotal">0</b></div>
+            <div class="stat-card"><span>Année</span><b id="yearTotal">0</b></div>
         </div>
-        <div class="calendar" id="calendar"></div>
-        <p style="font-size: 0.65rem; color: #94a3b8; text-align: center; margin-top: 10px;">Cliquez sur un jour pour modifier kcal ou voir les totaux de cette période.</p>
+
+        <div class="cal-header">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">&#10094;</button>
+            <b id="currentMonthYear">Mars 2026</b>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">&#10095;</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 </div>
 
 <script>
-    const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+    const daysArr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
     const dayDataDefaults = {
-        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente à plat." },
+        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente." },
         "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné Doux :</b> 1min rapide / 1min lente." },
-        "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Objectif Ventre Plat :</b> Marche inclinée forte." },
+        "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Ventre Plat :</b> Marche inclinée forte." },
         "Jeu": { t: 30, s: 5.0, i: 0, desc: "🎯 <b>Récupération :</b> Marche tranquille." },
-        "Ven": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Perte de poids stable." },
-        "Sam": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos :</b> Récupération musculaire." },
-        "Dim": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Sortie longue inclinée." }
+        "Fri": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Stable." },
+        "Sat": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos.</b>" },
+        "Sun": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Inclinaison longue." }
     };
+    // Correction des clés pour correspondre aux boutons
+    dayDataDefaults["Ven"] = dayDataDefaults["Fri"]; 
+    dayDataDefaults["Sam"] = dayDataDefaults["Sat"];
+    dayDataDefaults["Dim"] = dayDataDefaults["Sun"];
 
     let history = JSON.parse(localStorage.getItem('tapisHistory')) || {};
+    let viewDate = new Date();
 
     function init() {
         const nav = document.getElementById('daysNav');
-        days.forEach(d => {
+        daysArr.forEach(d => {
             const btn = document.createElement('button');
             btn.className = 'day-btn';
             btn.innerText = d;
@@ -148,35 +159,26 @@
         const i = parseFloat(document.getElementById('incl').value);
         document.getElementById('tDisplay').innerText = t + " min";
         document.getElementById('sDisplay').innerText = s.toFixed(1) + " km/h";
-        document.getElementById('iDisplay').innerText = i + " %";
-        if (s <= 0) { document.getElementById('kcalResult').innerHTML = "0 <small>kcal</small>"; return; }
+        document.getElementById('inclVal').innerText = i + " %";
+        if (s <= 0) { document.getElementById('kcalResult').innerText = "0"; return; }
         let met = (s <= 8) ? (3.5 + (0.1 * s * 16.6) + (1.8 * s * 16.6 * i/100)) / 3.5 
                            : (3.5 + (0.2 * s * 16.6) + (0.9 * s * 16.6 * i/100)) / 3.5;
         let kcal = Math.round(met * 3.5 * w / 200 * t);
-        document.getElementById('kcalResult').innerHTML = kcal + " <small style='font-size: 1.2rem;'>kcal</small>";
+        document.getElementById('kcalResult').innerText = kcal;
     }
 
     function saveSession() {
         const kcal = parseInt(document.getElementById('kcalResult').innerText);
         if (kcal <= 0) return;
-        const today = new Date().toISOString().split('T')[0];
-        history[today] = (history[today] || 0) + kcal;
+        const iso = new Date().toISOString().split('T')[0];
+        history[iso] = (history[iso] || 0) + kcal;
         saveAndRefresh(new Date());
-        alert("Enregistré ! 🔥");
     }
 
-    function editDate(isoDate) {
-        const current = history[isoDate] || 0;
-        const clickedDate = new Date(isoDate);
-        updateStats(clickedDate); // Met à jour les stats pour la période cliquée
-
-        const newVal = prompt(`Date : ${isoDate}\nModifier les kcal (actuel: ${current}) :\n(0 pour supprimer)`, current);
-        if (newVal !== null) {
-            const val = parseInt(newVal);
-            if (val <= 0) delete history[isoDate];
-            else history[isoDate] = val;
-            saveAndRefresh(clickedDate);
-        }
+    function changeMonth(offset) {
+        viewDate.setMonth(viewDate.getMonth() + offset);
+        renderCalendar();
+        updateStats(viewDate);
     }
 
     function saveAndRefresh(refDate) {
@@ -185,56 +187,61 @@
         updateStats(refDate);
     }
 
-    function getMonday(d) {
-        d = new Date(d);
-        var day = d.getDay(),
-            diff = d.getDate() - day + (day == 0 ? -6 : 1);
-        return new Date(d.setDate(diff)).toISOString().split('T')[0];
-    }
-
     function renderCalendar() {
-        const cal = document.getElementById('calendar');
-        cal.innerHTML = "";
-        const now = new Date();
-        for (let j = 27; j >= 0; j--) {
-            const d = new Date();
-            d.setDate(now.getDate() - j);
-            const iso = d.toISOString().split('T')[0];
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = "";
+        const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+        document.getElementById('currentMonthYear').innerText = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+
+        // Jours de la semaine
+        daysArr.forEach(d => grid.innerHTML += `<div class="weekday-label">${d}</div>`);
+
+        const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+        let startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+        const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+
+        for (let i = 0; i < startDay; i++) grid.innerHTML += `<div class="cal-day empty"></div>`;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateObj = new Date(viewDate.getFullYear(), viewDate.getMonth(), d);
+            const iso = dateObj.toISOString().split('T')[0];
             const hasKcal = history[iso];
+            const isToday = iso === new Date().toISOString().split('T')[0];
+            
             const dayEl = document.createElement('div');
-            dayEl.className = `cal-day ${hasKcal ? 'has-data' : ''} ${iso === new Date().toISOString().split('T')[0] ? 'today' : ''}`;
-            dayEl.innerHTML = `<span>${d.getDate()}</span><b>${hasKcal || ''}</b>`;
-            dayEl.onclick = () => editDate(iso);
-            cal.appendChild(dayEl);
+            dayEl.className = `cal-day ${hasKcal ? 'has-data' : ''} ${isToday ? 'today' : ''}`;
+            dayEl.innerHTML = `<span>${d}</span><b>${hasKcal || ''}</b>`;
+            dayEl.onclick = () => {
+                const current = history[iso] || 0;
+                const newVal = prompt(`Kcal pour le ${d}/${viewDate.getMonth()+1} :`, current);
+                if (newVal !== null) {
+                    if (parseInt(newVal) <= 0) delete history[iso];
+                    else history[iso] = parseInt(newVal);
+                    saveAndRefresh(dateObj);
+                }
+            };
+            grid.appendChild(dayEl);
         }
     }
 
     function updateStats(refDate) {
         let wTotal = 0, mTotal = 0, yTotal = 0;
-        const refIso = refDate.toISOString().split('T')[0];
-        const refMonday = getMonday(new Date(refDate));
         const refMonth = refDate.getMonth();
         const refYear = refDate.getFullYear();
+        
+        // Calcul du lundi de la semaine de refDate
+        const d = new Date(refDate);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(d.setDate(diff)).toISOString().split('T')[0];
+        const sunday = new Date(new Date(monday).setDate(new Date(monday).getDate() + 6)).toISOString().split('T')[0];
 
-        // Calculer les limites de la semaine (Lundi au Dimanche)
-        const mondayDate = new Date(refMonday);
-        const sundayDate = new Date(mondayDate);
-        sundayDate.setDate(mondayDate.getDate() + 6);
-
-        Object.keys(history).forEach(dateStr => {
-            const d = new Date(dateStr);
-            const val = history[dateStr];
-            
-            // Année en cours
-            if (d.getFullYear() === new Date().getFullYear()) yTotal += val;
-
-            // Mois de la date sélectionnée
-            if (d.getMonth() === refMonth && d.getFullYear() === refYear) mTotal += val;
-
-            // Semaine de la date sélectionnée (Lundi au Dimanche)
-            if (dateStr >= refMonday && dateStr <= sundayDate.toISOString().split('T')[0]) {
-                wTotal += val;
-            }
+        Object.keys(history).forEach(iso => {
+            const val = history[iso];
+            const date = new Date(iso);
+            if (date.getFullYear() === new Date().getFullYear()) yTotal += val;
+            if (date.getMonth() === refMonth && date.getFullYear() === refYear) mTotal += val;
+            if (iso >= monday && iso <= sunday) wTotal += val;
         });
 
         document.getElementById('weekTotal').innerText = wTotal + " kcal";
@@ -242,9 +249,7 @@
         document.getElementById('yearTotal').innerText = yTotal + " kcal";
     }
 
-    function clearData() {
-        if(confirm("Effacer tout ?")) { history = {}; saveAndRefresh(new Date()); }
-    }
+    function clearData() { if(confirm("Effacer tout ?")) { history = {}; saveAndRefresh(new Date()); } }
 
     init();
 </script>
