@@ -44,7 +44,8 @@
         .stat-card b { font-size: 1rem; color: var(--success); }
 
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 20px; }
-        .cal-day { aspect-ratio: 1; background: #334155; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; position: relative; border: 1px solid transparent; }
+        .cal-day { aspect-ratio: 1; background: #334155; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; position: relative; border: 1px solid transparent; cursor: pointer; transition: 0.2s; }
+        .cal-day:hover { background: #475569; }
         .cal-day.has-data { background: rgba(16, 185, 129, 0.2); border-color: var(--success); color: var(--success); }
         .cal-day b { font-size: 0.75rem; margin-top: 2px; }
         .cal-day.today { border-color: var(--primary); box-shadow: 0 0 10px rgba(37, 99, 235, 0.3); }
@@ -65,9 +66,7 @@
 
         <div class="days-nav" id="daysNav"></div>
 
-        <div class="info-box" id="advice">
-            Sélectionnez un jour pour charger votre séance.
-        </div>
+        <div class="info-box" id="advice">Sélectionnez un jour.</div>
 
         <div class="control">
             <div class="label-row"><span>Durée</span><span class="val-display" id="tDisplay">30 min</span></div>
@@ -83,7 +82,7 @@
         </div>
 
         <div class="result-box">
-            <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Brûlage Estimé</span>
+            <span style="font-size: 0.8rem; text-transform: uppercase;">Brûlage Estimé</span>
             <span class="kcal-val" id="kcalResult">0 <small style="font-size: 1.2rem; font-weight: 400;">kcal</small></span>
         </div>
         <button class="btn-validate" onclick="saveSession()">VALIDER & ENREGISTRER</button>
@@ -97,19 +96,20 @@
             <div class="stat-card"><span>Année</span><b id="yearTotal">0</b></div>
         </div>
         <div class="calendar" id="calendar"></div>
+        <p style="font-size: 0.7rem; color: #94a3b8; text-align: center; margin-top: 10px;">💡 Cliquez sur une date pour modifier ou supprimer une séance.</p>
     </div>
 </div>
 
 <script>
     const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
     const dayDataDefaults = {
-        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente à plat. Travaille le souffle et la base aérobie." },
-        "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné Doux :</b> Alternez 1min rapide et 1min lente. Boost le métabolisme." },
-        "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Objectif Ventre Plat :</b> Marche inclinée forte. Brûle les graisses sans impact articulaire." },
-        "Jeu": { t: 30, s: 5.0, i: 0, desc: "🎯 <b>Récupération :</b> Marche tranquille pour éliminer les toxines." },
-        "Ven": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Travail de fond régulier pour la perte de poids." },
-        "Sam": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos :</b> Laissez votre corps récupérer pour éviter le surentraînement." },
-        "Dim": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Sortie longue inclinée. Excellent pour sculpter les fessiers." }
+        "Lun": { t: 45, s: 6.0, i: 0, desc: "🎯 <b>Endurance Fondamentale :</b> Course lente à plat." },
+        "Mar": { t: 40, s: 7.2, i: 1, desc: "🎯 <b>Fractionné Doux :</b> 1min rapide / 1min lente." },
+        "Mer": { t: 40, s: 4.8, i: 10, desc: "🎯 <b>Objectif Ventre Plat :</b> Marche inclinée forte." },
+        "Jeu": { t: 30, s: 5.0, i: 0, desc: "🎯 <b>Récupération :</b> Marche tranquille." },
+        "Ven": { t: 50, s: 6.2, i: 1, desc: "🎯 <b>Endurance Longue :</b> Perte de poids stable." },
+        "Sam": { t: 0, s: 0, i: 0, desc: "🎯 <b>Repos :</b> Récupération musculaire." },
+        "Dim": { t: 60, s: 5.2, i: 7, desc: "🎯 <b>Rando Tapis :</b> Sortie longue inclinée." }
     };
 
     let history = JSON.parse(localStorage.getItem('tapisHistory')) || {};
@@ -125,7 +125,7 @@
         });
         renderCalendar();
         updateStats();
-        // Charger le jour actuel par défaut
+        // Charger jour actuel
         const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
         const todayName = dayNames[new Date().getDay()];
         const targetBtn = Array.from(document.querySelectorAll('.day-btn')).find(b => b.innerText === todayName) || document.querySelectorAll('.day-btn')[0];
@@ -148,13 +148,10 @@
         const t = parseFloat(document.getElementById('time').value);
         const s = parseFloat(document.getElementById('speed').value);
         const i = parseFloat(document.getElementById('incl').value);
-
         document.getElementById('tDisplay').innerText = t + " min";
         document.getElementById('sDisplay').innerText = s.toFixed(1) + " km/h";
         document.getElementById('iDisplay').innerText = i + " %";
-
-        if (s === 0) { document.getElementById('kcalResult').innerHTML = "0 <small style='font-size: 1.2rem; font-weight: 400;'>kcal</small>"; return; }
-
+        if (s === 0) { document.getElementById('kcalResult').innerHTML = "0 <small>kcal</small>"; return; }
         let met = (s <= 8) ? (3.5 + (0.1 * s * 16.6) + (1.8 * s * 16.6 * i/100)) / 3.5 
                            : (3.5 + (0.2 * s * 16.6) + (0.9 * s * 16.6 * i/100)) / 3.5;
         let kcal = Math.round(met * 3.5 * w / 200 * t);
@@ -163,31 +160,43 @@
 
     function saveSession() {
         const kcal = parseInt(document.getElementById('kcalResult').innerText);
-        if (kcal <= 0) return alert("Vitesse trop basse pour valider !");
-        
+        if (kcal <= 0) return alert("Séance inactive.");
         const today = new Date().toISOString().split('T')[0];
         history[today] = (history[today] || 0) + kcal;
+        saveAndRefresh();
+        alert("Enregistré ! 🔥");
+    }
+
+    function editDate(isoDate) {
+        const current = history[isoDate] || 0;
+        const newVal = prompt(`Modifier la séance du ${isoDate} :\n(Entrez 0 pour supprimer)`, current);
+        if (newVal !== null) {
+            const val = parseInt(newVal);
+            if (val <= 0) delete history[isoDate];
+            else history[isoDate] = val;
+            saveAndRefresh();
+        }
+    }
+
+    function saveAndRefresh() {
         localStorage.setItem('tapisHistory', JSON.stringify(history));
-        
         renderCalendar();
         updateStats();
-        alert("Bravo ! Séance enregistrée. 🔥");
     }
 
     function renderCalendar() {
         const cal = document.getElementById('calendar');
         cal.innerHTML = "";
         const now = new Date();
-        // 28 derniers jours
         for (let j = 27; j >= 0; j--) {
             const d = new Date();
             d.setDate(now.getDate() - j);
             const iso = d.toISOString().split('T')[0];
             const hasKcal = history[iso];
-            
             const dayEl = document.createElement('div');
             dayEl.className = `cal-day ${hasKcal ? 'has-data' : ''} ${j === 0 ? 'today' : ''}`;
-            dayEl.innerHTML = `<span>${d.getDate()}</span><b>${hasKcal ? hasKcal : ''}</b>`;
+            dayEl.innerHTML = `<span>${d.getDate()}</span><b>${hasKcal || ''}</b>`;
+            dayEl.onclick = () => editDate(iso);
             cal.appendChild(dayEl);
         }
     }
@@ -211,12 +220,7 @@
     }
 
     function clearData() {
-        if(confirm("Effacer tout l'historique ?")) {
-            localStorage.removeItem('tapisHistory');
-            history = {};
-            renderCalendar();
-            updateStats();
-        }
+        if(confirm("Effacer tout ?")) { history = {}; saveAndRefresh(); }
     }
 
     init();
