@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tapis Tracker Pro - Coach</title>
+    <title>Tapis Tracker Pro - Final</title>
     <style>
         :root {
             --primary: #2563eb; --secondary: #3b82f6; --success: #10b981;
@@ -39,13 +39,13 @@
         .btn-validate:active { transform: scale(0.96); opacity: 0.8; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 15px 0; text-align: center; }
-        .stat-card { background: #334155; padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .stat-card span { display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-        .stat-card b { font-size: 1rem; color: var(--success); }
+        .stat-card { background: #334155; padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); cursor: help; }
+        .stat-card span { display: block; font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-card b { font-size: 0.9rem; color: var(--success); }
 
         .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 20px; }
         .cal-day { aspect-ratio: 1; background: #334155; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; position: relative; border: 1px solid transparent; cursor: pointer; transition: 0.2s; }
-        .cal-day:hover { background: #475569; }
+        .cal-day:hover { background: #475569; transform: scale(1.05); }
         .cal-day.has-data { background: rgba(16, 185, 129, 0.2); border-color: var(--success); color: var(--success); }
         .cal-day b { font-size: 0.75rem; margin-top: 2px; }
         .cal-day.today { border-color: var(--primary); box-shadow: 0 0 10px rgba(37, 99, 235, 0.3); }
@@ -60,12 +60,11 @@
 
     <div class="section">
         <div class="weight-cfg">
-            <label>Mon Poids :</label>
+            <label>Poids :</label>
             <input type="number" id="weight" value="80" oninput="calculate()"> <span style="color:#94a3b8">kg</span>
         </div>
 
         <div class="days-nav" id="daysNav"></div>
-
         <div class="info-box" id="advice">Sélectionnez un jour.</div>
 
         <div class="control">
@@ -82,7 +81,7 @@
         </div>
 
         <div class="result-box">
-            <span style="font-size: 0.8rem; text-transform: uppercase;">Brûlage Estimé</span>
+            <span style="font-size: 0.8rem; text-transform: uppercase;">Séance actuelle</span>
             <span class="kcal-val" id="kcalResult">0 <small style="font-size: 1.2rem; font-weight: 400;">kcal</small></span>
         </div>
         <button class="btn-validate" onclick="saveSession()">VALIDER & ENREGISTRER</button>
@@ -91,12 +90,12 @@
     <div class="section">
         <h2>HISTORIQUE <button class="btn-clear" onclick="clearData()">RAZ</button></h2>
         <div class="stats-grid">
-            <div class="stat-card"><span>7 Jours</span><b id="weekTotal">0</b></div>
-            <div class="stat-card"><span>Mois</span><b id="monthTotal">0</b></div>
-            <div class="stat-card"><span>Année</span><b id="yearTotal">0</b></div>
+            <div class="stat-card" title="Total du Lundi au Dimanche de la date sélectionnée"><span>Semaine</span><b id="weekTotal">0</b></div>
+            <div class="stat-card" title="Total du mois de la date sélectionnée"><span>Mois</span><b id="monthTotal">0</b></div>
+            <div class="stat-card" title="Total de l'année en cours"><span>Année</span><b id="yearTotal">0</b></div>
         </div>
         <div class="calendar" id="calendar"></div>
-        <p style="font-size: 0.7rem; color: #94a3b8; text-align: center; margin-top: 10px;">💡 Cliquez sur une date pour modifier ou supprimer une séance.</p>
+        <p style="font-size: 0.65rem; color: #94a3b8; text-align: center; margin-top: 10px;">Cliquez sur un jour pour modifier kcal ou voir les totaux de cette période.</p>
     </div>
 </div>
 
@@ -124,8 +123,7 @@
             nav.appendChild(btn);
         });
         renderCalendar();
-        updateStats();
-        // Charger jour actuel
+        updateStats(new Date());
         const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
         const todayName = dayNames[new Date().getDay()];
         const targetBtn = Array.from(document.querySelectorAll('.day-btn')).find(b => b.innerText === todayName) || document.querySelectorAll('.day-btn')[0];
@@ -151,37 +149,47 @@
         document.getElementById('tDisplay').innerText = t + " min";
         document.getElementById('sDisplay').innerText = s.toFixed(1) + " km/h";
         document.getElementById('iDisplay').innerText = i + " %";
-        if (s === 0) { document.getElementById('kcalResult').innerHTML = "0 <small>kcal</small>"; return; }
+        if (s <= 0) { document.getElementById('kcalResult').innerHTML = "0 <small>kcal</small>"; return; }
         let met = (s <= 8) ? (3.5 + (0.1 * s * 16.6) + (1.8 * s * 16.6 * i/100)) / 3.5 
                            : (3.5 + (0.2 * s * 16.6) + (0.9 * s * 16.6 * i/100)) / 3.5;
         let kcal = Math.round(met * 3.5 * w / 200 * t);
-        document.getElementById('kcalResult').innerHTML = kcal + " <small style='font-size: 1.2rem; font-weight: 400;'>kcal</small>";
+        document.getElementById('kcalResult').innerHTML = kcal + " <small style='font-size: 1.2rem;'>kcal</small>";
     }
 
     function saveSession() {
         const kcal = parseInt(document.getElementById('kcalResult').innerText);
-        if (kcal <= 0) return alert("Séance inactive.");
+        if (kcal <= 0) return;
         const today = new Date().toISOString().split('T')[0];
         history[today] = (history[today] || 0) + kcal;
-        saveAndRefresh();
+        saveAndRefresh(new Date());
         alert("Enregistré ! 🔥");
     }
 
     function editDate(isoDate) {
         const current = history[isoDate] || 0;
-        const newVal = prompt(`Modifier la séance du ${isoDate} :\n(Entrez 0 pour supprimer)`, current);
+        const clickedDate = new Date(isoDate);
+        updateStats(clickedDate); // Met à jour les stats pour la période cliquée
+
+        const newVal = prompt(`Date : ${isoDate}\nModifier les kcal (actuel: ${current}) :\n(0 pour supprimer)`, current);
         if (newVal !== null) {
             const val = parseInt(newVal);
             if (val <= 0) delete history[isoDate];
             else history[isoDate] = val;
-            saveAndRefresh();
+            saveAndRefresh(clickedDate);
         }
     }
 
-    function saveAndRefresh() {
+    function saveAndRefresh(refDate) {
         localStorage.setItem('tapisHistory', JSON.stringify(history));
         renderCalendar();
-        updateStats();
+        updateStats(refDate);
+    }
+
+    function getMonday(d) {
+        d = new Date(d);
+        var day = d.getDay(),
+            diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(d.setDate(diff)).toISOString().split('T')[0];
     }
 
     function renderCalendar() {
@@ -194,33 +202,48 @@
             const iso = d.toISOString().split('T')[0];
             const hasKcal = history[iso];
             const dayEl = document.createElement('div');
-            dayEl.className = `cal-day ${hasKcal ? 'has-data' : ''} ${j === 0 ? 'today' : ''}`;
+            dayEl.className = `cal-day ${hasKcal ? 'has-data' : ''} ${iso === new Date().toISOString().split('T')[0] ? 'today' : ''}`;
             dayEl.innerHTML = `<span>${d.getDate()}</span><b>${hasKcal || ''}</b>`;
             dayEl.onclick = () => editDate(iso);
             cal.appendChild(dayEl);
         }
     }
 
-    function updateStats() {
+    function updateStats(refDate) {
         let wTotal = 0, mTotal = 0, yTotal = 0;
-        const now = new Date();
+        const refIso = refDate.toISOString().split('T')[0];
+        const refMonday = getMonday(new Date(refDate));
+        const refMonth = refDate.getMonth();
+        const refYear = refDate.getFullYear();
+
+        // Calculer les limites de la semaine (Lundi au Dimanche)
+        const mondayDate = new Date(refMonday);
+        const sundayDate = new Date(mondayDate);
+        sundayDate.setDate(mondayDate.getDate() + 6);
+
         Object.keys(history).forEach(dateStr => {
             const d = new Date(dateStr);
             const val = history[dateStr];
-            if (d.getFullYear() === now.getFullYear()) {
-                yTotal += val;
-                if (d.getMonth() === now.getMonth()) mTotal += val;
-                const diff = (now - d) / (1000 * 60 * 60 * 24);
-                if (diff <= 7) wTotal += val;
+            
+            // Année en cours
+            if (d.getFullYear() === new Date().getFullYear()) yTotal += val;
+
+            // Mois de la date sélectionnée
+            if (d.getMonth() === refMonth && d.getFullYear() === refYear) mTotal += val;
+
+            // Semaine de la date sélectionnée (Lundi au Dimanche)
+            if (dateStr >= refMonday && dateStr <= sundayDate.toISOString().split('T')[0]) {
+                wTotal += val;
             }
         });
-        document.getElementById('weekTotal').innerText = wTotal;
-        document.getElementById('monthTotal').innerText = mTotal;
-        document.getElementById('yearTotal').innerText = yTotal;
+
+        document.getElementById('weekTotal').innerText = wTotal + " kcal";
+        document.getElementById('monthTotal').innerText = mTotal + " kcal";
+        document.getElementById('yearTotal').innerText = yTotal + " kcal";
     }
 
     function clearData() {
-        if(confirm("Effacer tout ?")) { history = {}; saveAndRefresh(); }
+        if(confirm("Effacer tout ?")) { history = {}; saveAndRefresh(new Date()); }
     }
 
     init();
